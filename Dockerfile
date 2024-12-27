@@ -1,8 +1,8 @@
-# Используем базовый образ Ruby
+# Используем базовый образ для Ruby
 FROM ruby:3.1
 
-# Устанавливаем необходимые пакеты
-RUN apt-get update -qq && apt-get install -y build-essential libpq-dev nodejs yarn
+# Устанавливаем зависимости
+RUN apt-get update -qq && apt-get install -y nodejs postgresql-client
 
 # Устанавливаем рабочую директорию
 WORKDIR /app
@@ -10,14 +10,14 @@ WORKDIR /app
 # Копируем Gemfile и Gemfile.lock
 COPY Gemfile Gemfile.lock ./
 
-# Устанавливаем зависимости
+# Устанавливаем гемы
 RUN bundle install
 
-# Копируем весь проект в контейнер
+# Копируем всё приложение
 COPY . .
 
-# Указываем порт, на котором приложение будет работать
-EXPOSE 3000
+# Открываем порт 80
+EXPOSE 80
 
-# Команда запуска приложения
-CMD ["rails", "server", "-b", "0.0.0.0"]
+# Устанавливаем команду запуска приложения
+CMD ["rails", "server", "-b", "0.0.0.0", "-p", "80"]

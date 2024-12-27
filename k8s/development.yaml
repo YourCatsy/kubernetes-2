@@ -1,7 +1,7 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: webapp-deployment
+  name: webapp
   labels:
     app: webapp
 spec:
@@ -16,6 +16,6 @@ spec:
     spec:
       containers:
       - name: webapp
-        image: your-dockerhub-username/webapp:latest # Укажите имя вашего Docker-образа
+        image: <catherineamf>/webapp:latest
         ports:
-        - containerPort: 3000
+        - containerPort: 80
