@@ -48,11 +48,6 @@ jobs:
             kubectl logs $pod || echo "Logs not available for $pod"
           done
 
-      # Шаг 7: Ожидание готовности подов
-      - name: Wait for Pods to be Ready
-        run: |
-          kubectl wait --for=condition=Ready pod -l app=webapp --timeout=180s
-
       # Шаг 8: Тестирование сервиса
       - name: Port Forward to Web Service
         run: |
