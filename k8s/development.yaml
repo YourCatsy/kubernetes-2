@@ -24,7 +24,20 @@ spec:
           value: "production"
         readinessProbe:
           httpGet:
-            path: "/"
+            path: "/health" # Обновлено для правильного маршрута
             port: 80
           initialDelaySeconds: 5
           periodSeconds: 10
+        livenessProbe:
+          httpGet:
+            path: "/health" # Добавлена liveness-probe
+            port: 80
+          initialDelaySeconds: 10
+          periodSeconds: 20
+        resources: # Рекомендуется добавить лимиты ресурсов
+          requests:
+            memory: "128Mi"
+            cpu: "500m"
+          limits:
+            memory: "256Mi"
+            cpu: "1"
