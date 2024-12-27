@@ -1,23 +1,25 @@
-# Используем базовый образ для Ruby
+# Базовый образ с Ruby
 FROM ruby:3.1
 
-# Устанавливаем зависимости
-RUN apt-get update -qq && apt-get install -y nodejs postgresql-client
+# Установка системных зависимостей
+RUN apt-get update -qq && apt-get install -y \
+    build-essential libpq-dev nodejs yarn postgresql-client
 
-# Устанавливаем рабочую директорию
+# Установка рабочей директории
 WORKDIR /app
 
-# Копируем Gemfile и Gemfile.lock
+# Копирование файлов для установки зависимостей
 COPY Gemfile Gemfile.lock ./
+RUN bundle install --jobs 4
 
-# Устанавливаем гемы
-RUN bundle install
-
-# Копируем всё приложение
+# Копирование оставшихся файлов приложения
 COPY . .
 
-# Открываем порт 80
+# Предварительная компиляция ассетов (если есть фронтенд)
+RUN RAILS_ENV=production bundle exec rake assets:precompile
+
+# Открытие порта
 EXPOSE 80
 
-# Устанавливаем команду запуска приложения
+# Команда для запуска приложения
 CMD ["rails", "server", "-b", "0.0.0.0", "-p", "80"]

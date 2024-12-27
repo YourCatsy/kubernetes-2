@@ -16,6 +16,15 @@ spec:
     spec:
       containers:
       - name: webapp
-        image: <catherineamf>/webapp:latest
+        image: catherineamf/webapp:latest
         ports:
         - containerPort: 80
+        env:
+        - name: RAILS_ENV
+          value: "production"
+        readinessProbe:
+          httpGet:
+            path: "/"
+            port: 80
+          initialDelaySeconds: 5
+          periodSeconds: 10
