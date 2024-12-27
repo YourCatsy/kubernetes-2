@@ -15,23 +15,32 @@ jobs:
     # Шаг 1: Клонирование репозитория
     - uses: actions/checkout@v3
 
-    # Шаг 2: Создание Kubernetes-кластера Kind
+    # Шаг 2: Построение Docker-образа и загрузка в Docker Hub
+    - name: Build and Push Docker Image
+      env:
+        DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
+        DOCKER_PASSWORD: ${{ secrets.DOCKER_PASSWORD }}
+      run: |
+        docker build -t catherineamf/webapp:latest .
+        echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_USERNAME" --password-stdin
+        docker push catherineamf/webapp:latest
+
+    # Шаг 3: Создание Kubernetes-кластера Kind
     - name: Create k8s Kind Cluster
       uses: helm/kind-action@v1.5.0
 
-    # Шаг 3: Применение манифестов Kubernetes
+    # Шаг 4: Применение манифестов Kubernetes
     - name: Apply Kubernetes manifests
       run: |
         kubectl apply -R -f ./k8s
         kubectl get all # Для проверки созданных ресурсов
 
-    # Шаг 4: Проверка состояния подов
+    # Шаг 5: Проверка состояния подов
     - name: Check Pod Status
       run: |
-        kubectl get pods
-        kubectl describe pods # Описание подов для детальной диагностики
+        kubectl describe pod -l app=webapp
 
-    # Шаг 5: Сбор логов подов
+    # Шаг 6: Сбор логов подов
     - name: Collect Pod Logs
       run: |
         for pod in $(kubectl get pods -o name); do
@@ -39,20 +48,20 @@ jobs:
           kubectl logs $pod
         done
 
-    # Шаг 6: Ожидание готовности подов
+    # Шаг 7: Ожидание готовности подов
     - name: Wait for Pods to be Ready
       run: |
         kubectl wait pods --all --for condition=Ready --timeout=120s
 
-    # Шаг 7: Проброс порта для доступа к сервису
+    # Шаг 8: Тестирование сервиса
     - name: Port Forward to Web Service
       run: |
         kubectl port-forward service/webapp-service 8080:80 &
 
-    # Шаг 8: Тестирование сервиса
     - name: Test Service Functionality
       uses: cypress-io/github-action@v6
       env:
         CYPRESS_BASE_URL: http://localhost:8080
       with:
         working-directory: ./.github/tests
+
